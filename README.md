@@ -8,7 +8,7 @@
 
 - 登录认证：JWT 双 token（access 2h + refresh 原子轮换/吊销），登录失败限速锁定
 - 权限体系：RBAC + 数据范围（SELF / GROUP / ALL），接口注解鉴权 + 查询注入双闸，22 个权限码
-- 围栏管理：高德地图选点、半径可调（默认下限 150m 建议、硬下限 30m）、启停/逻辑删
+- 围栏管理：高德地图选点、半径可调（建议 ≥150m，硬下限 30m）、启停/逻辑删
 - 打卡：服务端 Haversine 复算判定（端上判定不可信），命中任一启用围栏（重叠取最近）才落库；mock/真实双轨开关
 - 考勤：固定班次规则（生效日 bitmask + 绑定角色/分组/人员），迟到/早退/缺卡/旷工/地点异常判定，日报全量重算
 - 审计：成功与失败操作均落审计（独立事务防回滚），密码脱敏
@@ -43,16 +43,19 @@ frontend  Vue 3 单项目
 
 ## 快速开始（开发环境）
 
-```bash
-# 1. 起开发栈（PG + Redis + Maven dev 容器）
-cd deploy && docker-compose -f docker-compose.dev.yml up -d
+前置要求：Docker + **Docker Compose v2**（`docker compose` 子命令；v1 与新版 Docker 不兼容）、Node 18+。
 
-# 2. 容器内启动后端（首次自动建表 + 初始账号，mock 打卡模式）
+```bash
+# 1. 起开发栈（PG + Redis + Maven dev 容器，首次会拉取镜像）
+cd deploy && docker compose -f docker-compose.dev.yml up -d
+
+# 2. 容器内启动后端（首次运行需下载 Maven 依赖，约几分钟；之后启动约 1 分钟）
 docker exec -d geofence-dev sh -c 'SPRING_DATASOURCE_URL="jdbc:postgresql://postgres:5432/geofence_checkin" \
   SPRING_DATA_REDIS_HOST=redis mvn -s /root/.m2/settings.xml spring-boot:run > /tmp/app.log 2>&1'
+docker exec geofence-dev tail -f /tmp/app.log   # 看到 "Started CheckinApplication" 即就绪，Ctrl+C 退出跟踪
 
-# 3. 前端
-cd frontend && npm install && npm run dev   # http://localhost:5173
+# 3. 前端（回到仓库根目录）
+cd ../frontend && npm install && npm run dev   # http://localhost:5173
 ```
 
 默认账号：`admin/admin123`、`manager/manager123`、`employee/employee123`（仅 `app.init-enabled=true` 且空库时创建）
@@ -64,23 +67,23 @@ cd frontend && npm install && npm run dev   # http://localhost:5173
 ```bash
 docker exec geofence-dev mvn -s /root/.m2/settings.xml test
 ```
-
 50 个单测覆盖：权限校验与数据范围（SELF/GROUP/ALL/组长语义）、真实围栏判定（圈内/圈外/重叠取最近/可疑标记）、固定班次判定矩阵（迟到/早退/缺卡/旷工/地点异常）、规则匹配优先级与校验。
 
 ## 生产部署
 
+要求 Docker Compose v2（v1 在 `up` 阶段会因 `ContainerConfig` 字段缺失报错，无法使用）。
+
 ```bash
 cd deploy
-PG_PASSWORD=xxx JWT_SECRET=<32+随机串> HTTP_PORT=80 docker-compose up -d --build
+PG_PASSWORD=xxx JWT_SECRET=<32+随机串> HTTP_PORT=80 docker compose up -d --build
 ```
 
-生产强制环境变量注入 `JWT_SECRET`/`PG_PASSWORD`；`CHECKIN_MOCK_ENABLED` 默认 false（真实判定）；`APP_INIT_ENABLED` 默认 false。
+生产强制环境变量注入 `JWT_SECRET`/`PG_PASSWORD`；`CHECKIN_MOCK_ENABLED` 默认 false（真实判定）；`APP_INIT_ENABLED` 默认 false（不自动建初始账号，需 `true` 显式开启做首次引导后改回）。
 
 ## 目录
 
 ```
 backend/    Spring Boot 后端（core/biz/api 分层 + Flyway 迁移）
 frontend/   Vue 3 前端（管理后台 + H5 打卡页）
-deploy/     docker-compose（dev / prod）+ Maven 镜像配置
-初步计划.md  定稿方案 v1.0（决策记录与二开扩展点规范）
+deploy/     docker compose（dev / prod）+ Maven 镜像配置
 ```
