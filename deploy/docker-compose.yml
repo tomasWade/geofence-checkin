@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: geofence-pg-prod
+    environment:
+      POSTGRES_DB: geofence_checkin
+      POSTGRES_USER: geofence
+      POSTGRES_PASSWORD: ${PG_PASSWORD:?need PG_PASSWORD}
+      TZ: Asia/Shanghai
+    volumes:
+      - pg-data-prod:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: geofence-redis-prod
+    restart: unless-stopped
+
+  backend:
+    build: ../backend
+    container_name: geofence-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/geofence_checkin
+      SPRING_DATASOURCE_USERNAME: geofence
+      SPRING_DATASOURCE_PASSWORD: ${PG_PASSWORD:?need PG_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+      JWT_SECRET: ${JWT_SECRET:?need JWT_SECRET}
+      APP_INIT_ENABLED: ${APP_INIT_ENABLED:-false}
+      CHECKIN_MOCK_ENABLED: "false"
+      TZ: Asia/Shanghai
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  frontend:
+    build: ../frontend
+    container_name: geofence-frontend
+    ports:
+      - "${HTTP_PORT:-80}:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pg-data-prod:

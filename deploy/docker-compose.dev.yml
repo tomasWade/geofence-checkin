@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: geofence-pg
+    environment:
+      POSTGRES_DB: geofence_checkin
+      POSTGRES_USER: geofence
+      POSTGRES_PASSWORD: geofence123
+      TZ: Asia/Shanghai
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: geofence-redis
+    ports:
+      - "6379:6379"
+
+  dev:
+    image: maven:3.9-eclipse-temurin-21
+    container_name: geofence-dev
+    working_dir: /workspace
+    volumes:
+      - ../backend:/workspace
+      - maven-repo:/root/.m2/repository
+      - ./maven-settings.xml:/root/.m2/settings.xml:ro
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/geofence_checkin
+      SPRING_DATA_REDIS_HOST: redis
+      CHECKIN_MOCK_ENABLED: "true"
+    command: sleep infinity
+
+volumes:
+  pg-data:
+  maven-repo:
