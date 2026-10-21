@@ -5,8 +5,7 @@ import com.geofence.checkin.biz.rule.entity.CheckinRuleScope;
 import com.geofence.checkin.biz.rule.mapper.CheckinRuleMapper;
 import com.geofence.checkin.biz.rule.mapper.CheckinRuleScopeMapper;
 import com.geofence.checkin.common.exception.BusinessException;
-import com.geofence.checkin.core.geo.entity.GeoFence;
-import com.geofence.checkin.core.geo.mapper.GeoFenceMapper;
+import com.geofence.checkin.core.geo.service.GeoFenceService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -28,8 +27,8 @@ class RuleServiceTest {
 
     private final CheckinRuleMapper ruleMapper = mock(CheckinRuleMapper.class);
     private final CheckinRuleScopeMapper scopeMapper = mock(CheckinRuleScopeMapper.class);
-    private final GeoFenceMapper fenceMapper = mock(GeoFenceMapper.class);
-    private final RuleService service = new RuleService(ruleMapper, scopeMapper, fenceMapper);
+    private final GeoFenceService geoFenceService = mock(GeoFenceService.class);
+    private final RuleService service = new RuleService(ruleMapper, scopeMapper, geoFenceService);
 
     private RuleSaveReq req(String bindType, List<Long> userIds) {
         RuleSaveReq r = new RuleSaveReq();
@@ -43,13 +42,7 @@ class RuleServiceTest {
     }
 
     private void fenceExists() {
-        GeoFence f = new GeoFence();
-        f.setId(1L);
-        f.setName("总部");
-        f.setLng(BigDecimal.ONE);
-        f.setLat(BigDecimal.ONE);
-        f.setRadiusM(200);
-        when(fenceMapper.selectById(1L)).thenReturn(f);
+        when(geoFenceService.get(1L)).thenReturn(new com.geofence.checkin.core.geo.entity.GeoFence());
     }
 
     @Test
@@ -72,7 +65,7 @@ class RuleServiceTest {
 
     @Test
     void missingFenceRejected() {
-        when(fenceMapper.selectById(99L)).thenReturn(null);
+        when(geoFenceService.get(99L)).thenThrow(new BusinessException("围栏不存在"));
         RuleSaveReq r = req("ALL", null);
         r.setFenceId(99L);
         BusinessException e = assertThrows(BusinessException.class, () -> service.create(r));

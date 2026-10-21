@@ -18,10 +18,10 @@ async function tryRefresh() {
   if (!refreshToken) return false
   if (!refreshing) {
     refreshing = rawPost('/auth/refresh', { refreshToken })
-      .then((body) => {
+      .then(async (body) => {
         if (body.code === 0 && body.data) {
-          localStorage.setItem('accessToken', body.data.accessToken)
-          localStorage.setItem('refreshToken', body.data.refreshToken)
+          const { useAuthStore } = await import('../stores/auth')
+          useAuthStore().setLogin(body.data)
           return true
         }
         return false
@@ -79,12 +79,5 @@ request.interceptors.response.use(
     return Promise.reject(err)
   },
 )
-
-export function clearSession() {
-  localStorage.removeItem('accessToken')
-  localStorage.removeItem('refreshToken')
-  localStorage.removeItem('userInfo')
-  localStorage.removeItem('perms')
-}
 
 export default request

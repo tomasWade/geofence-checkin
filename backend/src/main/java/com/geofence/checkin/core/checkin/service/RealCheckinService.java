@@ -10,18 +10,16 @@ import com.geofence.checkin.core.geo.calc.Haversine;
 import com.geofence.checkin.core.geo.entity.GeoFence;
 import com.geofence.checkin.core.geo.mapper.GeoFenceMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 打卡真实实现：服务端时间 + Haversine 复算，命中任一启用围栏（重叠取最近）即落库，全不命中拒绝并提示最近围栏距离；精度差仅作可疑标记。
+ * 打卡服务实现：服务端时间 + Haversine 复算，命中任一启用围栏（重叠取最近）即落库，全不命中拒绝并提示最近围栏距离；精度差仅作可疑标记。
  */
 @Service
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "checkin.mock-enabled", havingValue = "false", matchIfMissing = true)
 public class RealCheckinService implements CheckinService {
 
     private final CheckinRecordMapper recordMapper;

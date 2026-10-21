@@ -9,7 +9,7 @@
 - 登录认证：JWT 双 token（access 2h + refresh 原子轮换/吊销），登录失败限速锁定
 - 权限体系：RBAC + 数据范围（SELF / GROUP / ALL），接口注解鉴权 + 查询注入双闸，22 个权限码
 - 围栏管理：高德地图选点、半径可调（建议 ≥150m，硬下限 30m）、启停/逻辑删
-- 打卡：服务端 Haversine 复算判定（端上判定不可信），命中任一启用围栏（重叠取最近）才落库；mock/真实双轨开关
+- 打卡：服务端 Haversine 复算判定（端上判定不可信），命中任一启用围栏（重叠取最近）才落库
 - 考勤：固定班次规则（生效日 bitmask + 绑定角色/分组/人员），迟到/早退/缺卡/旷工/地点异常判定，日报全量重算
 - 审计：成功与失败操作均落审计（独立事务防回滚），密码脱敏
 - 代打卡：独立权限码 + 强制备注 + 数据范围校验，禁补录未来时间
@@ -27,7 +27,7 @@ backend  Spring Boot 3 单体（包级分层）
 │   ├── rule      固定班次规则 CRUD
 │   ├── attend    无状态判定器 FixedShiftEvaluator + 重算
 │   └── report    日报查询
-└── api/     接口薄壳（参数绑定 → core/biz Service → 响应）
+├── api/     接口薄壳（参数绑定 → core/biz Service → 响应）；打卡接口由 core 的 CheckinService 唯一实现
 
 frontend  Vue 3 单项目
 ├── 管理后台（登录/围栏地图选点/规则/记录/日报/用户/分组/审计）
@@ -78,7 +78,7 @@ cd deploy
 PG_PASSWORD=xxx JWT_SECRET=<32+随机串> HTTP_PORT=80 docker compose up -d --build
 ```
 
-生产强制环境变量注入 `JWT_SECRET`/`PG_PASSWORD`；`CHECKIN_MOCK_ENABLED` 默认 false（真实判定）；`APP_INIT_ENABLED` 默认 false（不自动建初始账号，需 `true` 显式开启做首次引导后改回）。
+生产强制环境变量注入 `JWT_SECRET`/`PG_PASSWORD`；`APP_INIT_ENABLED` 默认 false（不自动建初始账号，需 `true` 显式开启做首次引导后改回）。
 
 ## 目录
 

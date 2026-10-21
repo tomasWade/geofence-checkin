@@ -26,7 +26,6 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       JWT_SECRET: ${JWT_SECRET:?need JWT_SECRET}
       APP_INIT_ENABLED: ${APP_INIT_ENABLED:-false}
-      CHECKIN_MOCK_ENABLED: "false"
       TZ: Asia/Shanghai
     depends_on:
       - postgres

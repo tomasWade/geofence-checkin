@@ -5,10 +5,7 @@ import com.geofence.checkin.biz.rule.entity.CheckinRule;
 import com.geofence.checkin.biz.rule.entity.CheckinRuleScope;
 import com.geofence.checkin.biz.rule.mapper.CheckinRuleMapper;
 import com.geofence.checkin.biz.rule.mapper.CheckinRuleScopeMapper;
-import com.geofence.checkin.core.system.entity.SysGroupMember;
-import com.geofence.checkin.core.system.entity.SysUserRole;
-import com.geofence.checkin.core.system.mapper.SysGroupMemberMapper;
-import com.geofence.checkin.core.system.mapper.SysUserRoleMapper;
+import com.geofence.checkin.core.system.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +15,7 @@ import java.util.Optional;
 
 /**
  * 规则匹配：某用户某日适用的启用规则，优先级 USER > GROUP > ROLE > ALL，同级取 id 小者；生效日 bitmask 命中周一=bit0。
+ * 用户角色/分组等上下文一律走 core 的 UserService，不直接依赖 core 的 Mapper。
  */
 @Service
 @RequiredArgsConstructor
@@ -25,8 +23,7 @@ public class RuleMatchService {
 
     private final CheckinRuleMapper ruleMapper;
     private final CheckinRuleScopeMapper scopeMapper;
-    private final SysUserRoleMapper userRoleMapper;
-    private final SysGroupMemberMapper groupMemberMapper;
+    private final UserService userService;
 
     public Optional<CheckinRule> match(Long userId, LocalDate date) {
         int weekdayBit = 1 << (date.getDayOfWeek().getValue() - 1);
@@ -40,12 +37,8 @@ public class RuleMatchService {
             return Optional.empty();
         }
 
-        List<Long> myRoleIds = userRoleMapper.selectList(new LambdaQueryWrapper<SysUserRole>()
-                        .eq(SysUserRole::getUserId, userId))
-                .stream().map(SysUserRole::getRoleId).toList();
-        List<Long> myGroupIds = groupMemberMapper.selectList(new LambdaQueryWrapper<SysGroupMember>()
-                        .eq(SysGroupMember::getUserId, userId))
-                .stream().map(SysGroupMember::getGroupId).toList();
+        List<Long> myRoleIds = userService.roleIds(userId);
+        List<Long> myGroupIds = userService.groupIds(userId);
 
         CheckinRule best = pick(effective, "USER", userId, myRoleIds, myGroupIds);
         if (best == null) {

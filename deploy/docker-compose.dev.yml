@@ -31,7 +31,6 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/geofence_checkin
       SPRING_DATA_REDIS_HOST: redis
-      CHECKIN_MOCK_ENABLED: "true"
     command: sleep infinity
 
 volumes:

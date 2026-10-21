@@ -130,6 +130,32 @@ public class UserService {
         }
     }
 
+    /**
+     * 供 biz 判定/重算取数：全部启用用户。
+     */
+    public List<SysUser> listEnabled() {
+        return userMapper.selectList(new LambdaQueryWrapper<SysUser>()
+                .eq(SysUser::getStatus, 1));
+    }
+
+    /**
+     * 用户拥有的角色 ID 列表（供规则匹配等 biz 消费）。
+     */
+    public List<Long> roleIds(Long userId) {
+        return userRoleMapper.selectList(new LambdaQueryWrapper<SysUserRole>()
+                        .eq(SysUserRole::getUserId, userId))
+                .stream().map(SysUserRole::getRoleId).toList();
+    }
+
+    /**
+     * 用户所在的分组 ID 列表（供规则匹配等 biz 消费）。
+     */
+    public List<Long> groupIds(Long userId) {
+        return groupMemberMapper.selectList(new LambdaQueryWrapper<SysGroupMember>()
+                        .eq(SysGroupMember::getUserId, userId))
+                .stream().map(SysGroupMember::getGroupId).toList();
+    }
+
     public Map<Long, String> nameMap(List<Long> userIds) {
         if (userIds == null || userIds.isEmpty()) {
             return Map.of();

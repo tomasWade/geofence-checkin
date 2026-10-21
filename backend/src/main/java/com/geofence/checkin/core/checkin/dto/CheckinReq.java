@@ -16,5 +16,4 @@ public class CheckinReq {
     private BigDecimal lat;
     private Double accuracyM;
     private String clientTime;
-    private Boolean mockOutside;
 }

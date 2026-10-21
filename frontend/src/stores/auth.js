@@ -22,16 +22,6 @@ export const useAuthStore = defineStore('auth', {
       localStorage.setItem('perms', JSON.stringify(this.perms))
       localStorage.setItem('userInfo', JSON.stringify(this.userInfo))
     },
-    refreshPerms() {
-      const info = this.userInfo
-      if (!info) return Promise.resolve()
-      return import('../api').then(({ fetchMe }) =>
-        fetchMe().then((me) => {
-          this.perms = me.perms || []
-          localStorage.setItem('perms', JSON.stringify(this.perms))
-        }),
-      )
-    },
     clear() {
       this.accessToken = ''
       this.refreshToken = ''

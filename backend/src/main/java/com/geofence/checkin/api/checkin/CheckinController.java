@@ -26,7 +26,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * 打卡接口：打卡（mock/真实双轨）、我的今日、记录查询（数据范围）、代打卡。
+ * 打卡接口：打卡（服务端判定）、我的今日、记录查询（数据范围）、代打卡。
  */
 @RestController
 @RequestMapping("/api/v1/checkin")

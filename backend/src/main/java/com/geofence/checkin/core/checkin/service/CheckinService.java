@@ -4,7 +4,7 @@ import com.geofence.checkin.core.checkin.dto.CheckinReq;
 import com.geofence.checkin.core.checkin.dto.CheckinResultVO;
 
 /**
- * 打卡服务接口：mock 与真实实现的双轨契约（接口签名不变切换）。
+ * 打卡服务接口：core 对外契约，判定与落账一律在服务端。
  */
 public interface CheckinService {
 

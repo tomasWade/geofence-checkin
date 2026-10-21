@@ -40,7 +40,7 @@
       </div>
 
       <div class="h5-btn-area">
-        <button class="checkin-btn" :disabled="busy" @click="tryCheckin(false)">{{ busy ? '处理中…' : '打 卡' }}</button>
+        <button class="checkin-btn" :disabled="busy" @click="tryCheckin">{{ busy ? '处理中…' : '打 卡' }}</button>
       </div>
 
       <div class="h5-today" v-if="todayRecords.length">
@@ -49,10 +49,6 @@
           <span>{{ fmtTime(r.checkinTime) }}</span>
           <span>{{ r.fenceName }} · {{ r.distanceM?.toFixed(0) }}m</span>
         </div>
-      </div>
-
-      <div class="h5-dev" v-if="hasKey && !isProd">
-        <el-button size="small" @click="tryCheckin(true)">模拟圈外测试</el-button>
       </div>
     </div>
   </div>
@@ -148,7 +144,7 @@ function locate() {
   })
 }
 
-async function tryCheckin(mockOutside) {
+async function tryCheckin() {
   result.value = null
   busy.value = true
   try {
@@ -162,7 +158,6 @@ async function tryCheckin(mockOutside) {
       lat: useLat,
       accuracyM: accuracy.value,
       clientTime: new Date().toLocaleString('sv-SE').replace(' ', 'T'),
-      mockOutside: mockOutside || undefined,
     })
     result.value = { ok: true, msg: `${resp.fenceName} · 距圆心 ${resp.distanceM?.toFixed(0)} 米 · ${resp.message}` }
     loadToday()
@@ -296,10 +291,5 @@ onMounted(() => {
   font-size: 13px;
   padding: 6px 0;
   border-bottom: 1px dashed #eee;
-}
-
-.h5-dev {
-  text-align: center;
-  margin-top: 10px;
 }
 </style>

@@ -8,8 +8,7 @@ import com.geofence.checkin.biz.rule.entity.CheckinRuleScope;
 import com.geofence.checkin.biz.rule.mapper.CheckinRuleMapper;
 import com.geofence.checkin.biz.rule.mapper.CheckinRuleScopeMapper;
 import com.geofence.checkin.common.exception.BusinessException;
-import com.geofence.checkin.core.geo.entity.GeoFence;
-import com.geofence.checkin.core.geo.mapper.GeoFenceMapper;
+import com.geofence.checkin.core.geo.service.GeoFenceService;
 import com.geofence.checkin.core.system.audit.Audit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +19,7 @@ import java.util.List;
 
 /**
  * 规则管理：CRUD + 绑定对象维护；校验围栏存在、不支持跨天班次、非全员规则必须绑定对象。
+ * 围栏校验走 core 的 GeoFenceService，不直接依赖 core 的 Mapper。
  */
 @Service
 @RequiredArgsConstructor
@@ -27,7 +27,7 @@ public class RuleService {
 
     private final CheckinRuleMapper ruleMapper;
     private final CheckinRuleScopeMapper scopeMapper;
-    private final GeoFenceMapper fenceMapper;
+    private final GeoFenceService geoFenceService;
 
     public Page<CheckinRule> page(long page, long size, String keyword) {
         Page<CheckinRule> result = ruleMapper.selectPage(Page.of(page, size),
@@ -92,10 +92,7 @@ public class RuleService {
     }
 
     private void validate(RuleSaveReq req) {
-        GeoFence fence = fenceMapper.selectById(req.getFenceId());
-        if (fence == null) {
-            throw new BusinessException("绑定的围栏不存在");
-        }
+        geoFenceService.get(req.getFenceId());
         if (req.getWorkEndSec() <= req.getWorkStartSec()) {
             throw new BusinessException("下班时刻必须晚于上班时刻（暂不支持跨天班次）");
         }

@@ -27,7 +27,6 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { logout } from '../api'
-import { clearSession } from '../api/request'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -53,7 +52,6 @@ async function doLogout() {
     /* ignore */
   }
   auth.clear()
-  clearSession()
   router.push('/login')
 }
 </script>

@@ -4,10 +4,7 @@ import com.geofence.checkin.biz.rule.entity.CheckinRule;
 import com.geofence.checkin.biz.rule.entity.CheckinRuleScope;
 import com.geofence.checkin.biz.rule.mapper.CheckinRuleMapper;
 import com.geofence.checkin.biz.rule.mapper.CheckinRuleScopeMapper;
-import com.geofence.checkin.core.system.entity.SysGroupMember;
-import com.geofence.checkin.core.system.entity.SysUserRole;
-import com.geofence.checkin.core.system.mapper.SysGroupMemberMapper;
-import com.geofence.checkin.core.system.mapper.SysUserRoleMapper;
+import com.geofence.checkin.core.system.service.UserService;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -27,9 +24,8 @@ class RuleMatchServiceTest {
 
     private final CheckinRuleMapper ruleMapper = mock(CheckinRuleMapper.class);
     private final CheckinRuleScopeMapper scopeMapper = mock(CheckinRuleScopeMapper.class);
-    private final SysUserRoleMapper userRoleMapper = mock(SysUserRoleMapper.class);
-    private final SysGroupMemberMapper groupMemberMapper = mock(SysGroupMemberMapper.class);
-    private final RuleMatchService service = new RuleMatchService(ruleMapper, scopeMapper, userRoleMapper, groupMemberMapper);
+    private final UserService userService = mock(UserService.class);
+    private final RuleMatchService service = new RuleMatchService(ruleMapper, scopeMapper, userService);
 
     private final LocalDate friday = LocalDate.of(2026, 10, 16);
     private final LocalDate sunday = LocalDate.of(2026, 10, 18);
@@ -54,14 +50,8 @@ class RuleMatchServiceTest {
     }
 
     private void me(Long roleId, Long groupId, long userId) {
-        SysUserRole ur = new SysUserRole();
-        ur.setUserId(userId);
-        ur.setRoleId(roleId);
-        when(userRoleMapper.selectList(any())).thenReturn(roleId == null ? List.of() : List.of(ur));
-        SysGroupMember gm = new SysGroupMember();
-        gm.setUserId(userId);
-        gm.setGroupId(groupId);
-        when(groupMemberMapper.selectList(any())).thenReturn(groupId == null ? List.of() : List.of(gm));
+        when(userService.roleIds(userId)).thenReturn(roleId == null ? List.of() : List.of(roleId));
+        when(userService.groupIds(userId)).thenReturn(groupId == null ? List.of() : List.of(groupId));
     }
 
     @Test

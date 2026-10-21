@@ -62,6 +62,9 @@ public class RecordQueryService {
         return toVO(List.of(record)).get(0);
     }
 
+    /**
+     * 供 biz 判定/重算取数：某用户某日的全部打卡记录（按时间升序）。
+     */
     public List<CheckinRecord> listByUserAndDate(Long userId, LocalDate date) {
         return recordMapper.selectList(new LambdaQueryWrapper<CheckinRecord>()
                 .eq(CheckinRecord::getUserId, userId)

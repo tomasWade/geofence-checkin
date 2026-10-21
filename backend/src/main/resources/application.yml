@@ -30,9 +30,6 @@ jwt:
   access-token-ttl-minutes: 120
   refresh-token-ttl-days: 14
 
-checkin:
-  mock-enabled: false
-
 app:
   init-enabled: true
 
