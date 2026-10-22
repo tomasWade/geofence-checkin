@@ -14,6 +14,24 @@
 - 审计：成功与失败操作均落审计（独立事务防回滚），密码脱敏
 - 代打卡：独立权限码 + 强制备注 + 数据范围校验，禁补录未来时间
 
+## 运行截图
+
+| 登录 | 首页概览 |
+|:---:|:---:|
+| ![登录](docs/images/01-login.png) | ![首页概览](docs/images/02-dashboard.png) |
+
+| 围栏管理 | 打卡规则 |
+|:---:|:---:|
+| ![围栏管理](docs/images/03-fence-list.png) | ![打卡规则](docs/images/04-rule-list.png) |
+
+| 记录查询 | 考勤日报 |
+|:---:|:---:|
+| ![记录查询](docs/images/05-record-list.png) | ![考勤日报](docs/images/06-report-daily.png) |
+
+H5 打卡页（移动端，服务端判定成功）：
+
+![H5 打卡](docs/images/07-h5-checkin.png)
+
 ## 架构
 
 ```
